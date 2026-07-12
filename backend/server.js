@@ -1,12 +1,11 @@
 
 import "dotenv/config";
-console.log("MONGO_URI:", process.env.MONGO_URI);
-console.log("PORT:", process.env.PORT);
+
 import http from "node:http";
 import cors from "cors";
 import express from "express";
 import { Server } from "socket.io";
-console.log("MONGO_URI:", process.env.MONGO_URI);
+
 import { connectDatabase } from "./config/db.js";
 import alertRoutes from "./src/routes/alert.routes.js";
 import authRoutes from "./src/routes/auth.routes.js";
