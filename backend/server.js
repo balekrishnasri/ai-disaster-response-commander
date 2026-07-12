@@ -1,5 +1,6 @@
 
-import "dotenv/config";
+import dotenv from 'dotenv';
+dotenv.config();
 
 import http from "node:http";
 import cors from "cors";
@@ -15,6 +16,12 @@ import teamRoutes from "./src/routes/team.routes.js";
 import weatherRoutes from "./src/routes/weather.routes.js";
 import { configureSockets } from "./src/sockets/index.js";
 
+// ADD THIS DEBUG CODE:
+console.log('🔍 Environment Check:');
+console.log('MONGO_URI:', process.env.MONGO_URI ? '✅ SET' : '❌ UNDEFINED');
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL || '⚠️ Using default');
+console.log('NODE_ENV:', process.env.NODE_ENV || '⚠️ Not set');
+console.log('PORT:', process.env.PORT || '⚠️ Using default 5000');
 const app = express();
 const server = http.createServer(app);
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
