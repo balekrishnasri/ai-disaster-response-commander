@@ -1,69 +1,63 @@
-
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import http from "node:http";
-import cors from "cors";
-import express from "express";
-import { Server } from "socket.io";
-
-import { connectDatabase } from "./config/db.js";
-import alertRoutes from "./src/routes/alert.routes.js";
-import authRoutes from "./src/routes/auth.routes.js";
-import rescueRoutes from "./src/routes/rescue.routes.js";
-import shelterRoutes from "./src/routes/shelter.routes.js";
-import teamRoutes from "./src/routes/team.routes.js";
-import weatherRoutes from "./src/routes/weather.routes.js";
-import { configureSockets } from "./src/sockets/index.js";
-
-// ADD THIS DEBUG CODE:
-console.log('🔍 Environment Check:');
-console.log('MONGO_URI:', process.env.MONGO_URI ? '✅ SET' : '❌ UNDEFINED');
-console.log('FRONTEND_URL:', process.env.FRONTEND_URL || '⚠️ Using default');
-console.log('NODE_ENV:', process.env.NODE_ENV || '⚠️ Not set');
-console.log('PORT:', process.env.PORT || '⚠️ Using default 5000');
 const app = express();
-const server = http.createServer(app);
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
-const io = new Server(server, {
-  cors: { origin: frontendUrl, methods: ["GET", "POST", "PATCH"] },
+app.use(cors());
+app.use(express.json());
+
+console.log('🚀 Server starting...');
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
 });
 
-app.set("io", io);
-app.use(cors({ origin: frontendUrl }));
-app.use(express.json({ limit: "1mb" }));
-
-app.get("/api/health", (_req, res) =>
-  res.json({ status: "ok", timestamp: new Date().toISOString() }),
-);
-app.use("/api/auth", authRoutes);
-app.use("/api/shelters", shelterRoutes);
-app.use("/api/alerts", alertRoutes);
-app.use("/api/weather", weatherRoutes);
-app.use("/api/rescue", rescueRoutes);
-app.use("/api/teams", teamRoutes);
-
-app.use((req, res) =>
-  res.status(404).json({ message: `Route not found: ${req.method} ${req.path}` }),
-);
-app.use((error, _req, res, _next) => {
-  console.error(error);
-  res.status(error.status || 500).json({
-    message: error.message || "Internal server error",
+// ✅ ADD THIS TEST ROUTE
+app.post('/api/auth/send-otp', (req, res) => {
+  console.log('✅ ROUTE WORKS!');
+  res.json({ 
+    success: true, 
+    message: 'OTP sent!',
+    otp: '123456'
   });
 });
 
-configureSockets(io);
+// Import auth routes
+import authRoutes from './src/routes/auth.routes.js';
+app.use('/api/auth', authRoutes);
 
-const port = Number(process.env.PORT || 5000);
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ 
+    success: false,
+    message: `Route not found: ${req.method} ${req.url}`
+  });
+});
 
-connectDatabase()
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('❌ Error:', err);
+  res.status(500).json({ 
+    success: false,
+    message: err.message 
+  });
+});
+
+// MongoDB
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/disaster_db';
+
+mongoose.connect(MONGO_URI)
   .then(() => {
-    server.listen(port, () => {
-      console.log(`AI Disaster Response API listening on port ${port}`);
+    console.log('✅ MongoDB connected');
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server on port ${PORT}`);
     });
   })
-  .catch((error) => {
-    console.error("Database connection failed:", error.message);
+  .catch(err => {
+    console.error('❌ DB error:', err.message);
     process.exit(1);
   });
