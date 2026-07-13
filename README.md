@@ -1,8 +1,8 @@
 # AI Disaster Response Commander
 
 A full-stack disaster-monitoring and rescue-coordination command center. The public dashboard combines OpenStreetMap, active alerts, nearby shelters, live Open-Meteo weather, and a local AI-style risk score. Authenticated citizens can request and track rescue help while responders receive, assign, and update requests in real time.
-
-## Stack
+    
+## Stack:
 
 - **Frontend:** React 18, Vite, Tailwind CSS, React Router v6
 - **Maps:** Leaflet + React Leaflet with OpenStreetMap tiles
