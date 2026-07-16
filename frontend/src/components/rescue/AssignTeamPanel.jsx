@@ -8,13 +8,17 @@ export const AssignTeamPanel = ({ request, onAssigned, onClose }) => {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api("/teams/available")
-      .then((data) => {
-        setTeams(data.teams);
-        setSelectedTeam(data.teams[0]?._id || "");
-      })
-      .catch((requestError) => setError(requestError.message));
-  }, [request._id]);
+  api("/teams/available")
+    .then((data) => {
+      console.log("Available teams:", data);
+      setTeams(data.teams);
+      setSelectedTeam(data.teams[0]?._id || "");
+    })
+    .catch((err) => {
+      console.error("Teams API error:", err);
+      setError(err.message);
+    });
+}, [request._id]);
 
   const assign = async (event) => {
     event.preventDefault();
